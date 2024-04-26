@@ -1,0 +1,211 @@
+# Copyright 2021-2023 FINCONS GROUP AG within the Horizon 2020 
+# European project SignON under grant agreement no. 101017255.
+
+# Licensed under the Apache License, Version 2.0 (the "License"); 
+# you may not use this file except in compliance with the License. 
+# You may obtain a copy of the License at 
+
+#     http://www.apache.org/licenses/LICENSE-2.0 
+
+# Unless required by applicable law or agreed to in writing, software 
+# distributed under the License is distributed on an "AS IS" BASIS, 
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+# See the License for the specific language governing permissions and 
+# limitations under the License.
+
+sharedSchemas:
+
+  App:
+    type: object
+    required:
+      - sourceKey
+      - sourceText
+      - sourceLanguage
+      - sourceMode
+      - sourceFileFormat
+      - sourceVideoCodec
+      - sourceVideoResolution
+      - sourceVideoFrameRate
+      - sourceVideoPixelFormat
+      - sourceAudioCodec
+      - sourceAudioChannels
+      - sourceAudioSampleRate
+      - translationLanguage
+      - translationMode
+      - appInstanceID
+      - appVersion
+      - T0App
+    description: Built by the App, it contains values regarding the input given by the User
+    properties:
+      sourceKey:
+        type: string
+        example: NONE
+        description: Where to find the video or the audio given by the user, if value not available use "NONE".
+      sourceText:
+        type: string
+        example: Hello Bob, How are you?
+        description: Text that the user wants to be translated, if value not available use "NONE".
+      sourceLanguage:
+        $ref: '#/sharedSchemas/Languages'
+      sourceMode:
+        type: string
+        enum:
+          - VIDEO
+          - AUDIO
+          - TEXT
+        example: TEXT
+        description: ENUM representing the mode in which the message is given
+          by the user.
+      sourceFileFormat:
+        type: string
+        example: wav
+        description: The format in which the file containing data regarding the video or the audio given by the user is saved, if value not available use "NONE".
+      sourceVideoCodec:
+        type: string
+        example: NONE
+        description: The codec used to compress the video, if value not available use "NONE".
+      sourceVideoResolution:
+        type: string
+        example: NONE
+        description: The resolution used for the video, if value not available use "NONE".
+      sourceVideoFrameRate:
+        type: number
+        example: -1
+        description: The frame rate used for the video, if value not available use "-1".
+      sourceVideoPixelFormat:
+        type: string
+        example: NONE
+        description: The pixel format used for the video, if value not available use "NONE".
+      sourceAudioCodec:
+        type: string
+        example: NONE
+        description: The codec used to compress the audio, if value not available use "NONE".
+      sourceAudioChannels:
+        type: string
+        example: NONE
+        description: The channels used for the audio, if value not available use "NONE".
+      sourceAudioSampleRate:
+        type: number
+        example: -1
+        description: The sample rate used for the audio, if value not available use "-1".
+      translationLanguage:
+        $ref: '#/sharedSchemas/Languages'
+      translationMode:
+        type: string
+        enum:
+          - AVATAR
+          - AUDIO
+          - TEXT
+        example: TEXT
+        description: ENUM representing the mode in which the message has to be returned to the user.
+      appInstanceID:
+        type: string
+        example: instance16
+        description: Identifier to recognize which instance of the app has sent the message.
+      appVersion:
+        type: string
+        example: "0.1.0"
+        description: App Version Number
+      T0App:
+        type: number
+        example: 1508484583259
+        description: Timestamp at which the message has been sent from the App to the orchestrator (yyyy-MM-dd HH:mm:ss,SSS).
+
+  OrchestratorRequest:
+    type: object
+    required:
+      - OrchestratorVersion
+      - T1Orchestrator
+      - bucketName
+    description: Built by the Orchestrator, it contains some additional values
+    properties:
+      OrchestratorVersion:
+        type: string
+        example: "0.1.0"
+        description: Orchestrator Version Number
+      T1Orchestrator:
+        type: integer
+        format: int64
+        example: 1508484583788
+        description: Timestamp at which the message has been sent from the orchestrator to WP3 in milliseconds
+      bucketName:
+        type: string
+        example: signon
+        description: Name of the Minio Bucket which contains the file relative to the object that was sent.
+
+  Languages:
+    type: string
+    enum:
+      - VGT   # Flemish SL
+      - SSP   # Spanish SL
+      - BFI   # British SL
+      - ISG   # Irish SL
+      - DSE   # Dutch SL
+      - ENG   # English
+      - GLE   # Irish
+      - NLD   # Flemish
+      - SPA   # Spanish
+      - DUT   # Dutch
+    example: SPA
+    description: ENUM representing the language in which the message is given by the user. VGT = Flemish Sign Language, SSP = Spanish Sign Language, BFI = British Sign Language, ISG = Irish Sign Language, DSE = Dutch Sign Language, ENG = English, GLE = Irish, NLD = Dutch / Flemish, SPA = Castillan, Spanish (for more info look at ISO 639-3 website https://iso639-3.sil.org/).
+
+  RabbitMQ:
+    type: object
+    required:
+      - sourceKey
+      - sourceText
+    description: Parameters needed for the RPC Pattern implemented by RabbitMQ
+    properties:
+      correlationID:
+        type: string
+        example: signon.rpc.requests_id23
+        description: Component generated automatically by rabbitMQ needed by WP2 for the correct handling of messages.
+      replyTo:
+        type: string
+        example: rabbitmq.requests_id23
+        description: Component generated automatically by rabbitMQ needed by WP2 for the correct handling of messages.
+
+  SourceLanguageProcessing:
+    type: string
+
+  IntermediateRepresentation:
+    type: string
+
+  MessageSynthesis:
+    type: string
+
+  Error:
+    type: object
+    description: Schema for the Error Message
+    properties:
+      type:
+        type: string
+        example: "urn:error-type:missing-app-instance-id"
+        description: URI that identifies the problem type
+      title:
+        type: string
+        example: "The AppInstanceID for the message is missing."
+        description: Human readable short description of the error
+      status:
+        type: integer
+        example: 400
+        description: Repetition of the response status code
+      detail:
+        type: string
+        example: "The AppInstanceID for the message is missing."
+        description: Human readable full description of the error
+      instance:
+        type: string
+        example: "urn:uuid:1ed5f7c1-e757-49d0-a1ba-4fb017c76e60"
+        description: URI reference that identifies the specific occurrence of the problem
+      stackTrace:
+        type: string
+        description: Stack trace of the error
+      timestamp:
+        type: string
+        example: "2022-09-01T14:06:11.153+00:00"
+        description: Timestamp of the error
+      parameters:
+        type: string
+        example: "null"
+        description: Relevant parameter
